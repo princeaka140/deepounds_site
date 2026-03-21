@@ -2,7 +2,7 @@
    SIMPLE EARN — API Helper
    ============================================================ */
 
-const API_BASE = '/api';
+const API_BASE = '';
 
 /**
  * Make an authenticated API call (includes cookies automatically).
