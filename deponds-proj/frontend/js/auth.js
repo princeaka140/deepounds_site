@@ -72,7 +72,7 @@ async function handleLogin() {
 
   setLoading('login-btn', true);
   try {
-    const data = await apiCall('/login', 'POST', payload);
+    const data = await apiCall('/api/login', 'POST', payload);
     if (data.success) {
       showToast('Login successful! Redirecting…', 'success');
       window.location.href = 'dashboard.html';
@@ -117,7 +117,7 @@ async function handleRegister() {
 
   setLoading('reg-btn', true);
   try {
-    let url = '/register';
+    let url = '/api/register';
     if (ref) url += `?ref=${encodeURIComponent(ref)}`;
 
     const data = await apiCall(url, 'POST', { name, username, email, password });
