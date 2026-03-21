@@ -29,9 +29,9 @@ class reg():
         try:
             cursor = get_cursor(self.connect)
             cursor.execute(
-                "INSERT INTO clients (user_name, password, ip, country, name, email, reffered_by) "
+                "INSERT INTO admin (user_name, password, country, name, email) "
                 "VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                (username, hashed_password, IP, country, name, email, reffered_by)
+                (username, hashed_password, country, name, email)
             )
             self.connect.commit()
             return {
