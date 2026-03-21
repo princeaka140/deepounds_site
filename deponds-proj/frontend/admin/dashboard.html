@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Earn — Admin Dashboard</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <!-- avatar-upload-wrap, avatar-preview → main.css -->
+  <style>
+    /* Admin stats container */
+    .stats-group { margin-bottom: 1.25rem; }
+    .stats-group-title {
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--text-faint); margin-bottom: 0.5rem;
+    }
+    /* Revenue block */
+    .revenue-block {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .revenue-block h4 {
+      font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--text-faint); margin-bottom: 0.75rem;
+    }
+    /* Admin notifications list */
+    .admin-notif-scroll {
+      max-height: 280px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      padding-right: 0.25rem;
+    }
+    .admin-notif-row {
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 0.875rem;
+      font-size: 0.85rem; font-weight: 500;
+      display: flex; gap: 0.75rem; align-items: flex-start;
+    }
+    .admin-notif-row .notif-user {
+      font-weight: 700; color: var(--primary); white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .admin-notif-row .notif-msg { color: var(--text-muted); flex: 1; }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">🛡️</div>
+        <div class="sidebar-logo-text">Admin <span>Panel</span></div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-group-label">Analytics</div>
+        <div class="nav-item active" data-section="stats" onclick="adminNav('stats', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          System Stats
+        </div>
+
+        <div class="nav-group-label">Withdrawals</div>
+        <div class="nav-item" data-section="with-pending" onclick="adminNav('with-pending', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Pending
+          <span id="with-pending-count" class="badge badge-warning" style="margin-left:auto;display:none"></span>
+        </div>
+        <div class="nav-item" data-section="with-approved" onclick="adminNav('with-approved', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Approved
+        </div>
+        <div class="nav-item" data-section="with-rejected" onclick="adminNav('with-rejected', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Rejected
+        </div>
+
+        <div class="nav-group-label">Deposits</div>
+        <div class="nav-item" data-section="dep-pending" onclick="adminNav('dep-pending', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Pending
+          <span id="dep-pending-count" class="badge badge-warning" style="margin-left:auto;display:none"></span>
+        </div>
+        <div class="nav-item" data-section="dep-approved" onclick="adminNav('dep-approved', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Approved
+        </div>
+        <div class="nav-item" data-section="dep-rejected" onclick="adminNav('dep-rejected', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Rejected
+        </div>
+
+        <div class="nav-group-label">Tools</div>
+        <div class="nav-item" data-section="bonus" onclick="adminNav('bonus', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+          Give Bonus
+        </div>
+        <div class="nav-item" data-section="profile" onclick="adminNav('profile', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Profile
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-ghost btn-full" style="justify-content:flex-start;gap:0.6rem;color:var(--danger);" onclick="handleAdminLogout()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main-area">
+      <header class="top-header">
+        <button class="btn btn-icon btn-ghost header-hamburger" onclick="openSidebar()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span class="header-title" id="admin-header-title">System Stats</span>
+        <div class="header-actions">
+          <div class="badge badge-primary" style="font-size:0.65rem;letter-spacing:0.06em;">ADMIN</div>
+          <div class="user-chip">
+            <div class="avatar" id="admin-avatar">A</div>
+            <span class="user-chip-name" id="admin-username">Admin</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-content">
+
+        <!-- ===== SYSTEM STATS ===== -->
+        <section class="page-section active" id="section-stats">
+          <div class="section-header flex items-center justify-between">
+            <div>
+              <h2 class="section-title">System Statistics</h2>
+              <p class="section-sub">Platform-wide performance overview.</p>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="loadSystemStats()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.08-4.95"/></svg>
+              Refresh
+            </button>
+          </div>
+          <!-- Dynamically populated by loadSystemStats() -->
+          <div id="sys-stats-container">
+            <div class="empty-state"><p>Loading stats…</p></div>
+          </div>
+        </section>
+
+        <!-- ===== PENDING WITHDRAWALS ===== -->
+        <section class="page-section" id="section-with-pending">
+          <div class="section-header flex items-center justify-between">
+            <div>
+              <h2 class="section-title">Pending Withdrawals</h2>
+              <p class="section-sub">Review and process withdrawal requests.</p>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="loadWithdrawals('pending')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.08-4.95"/></svg>
+              Refresh
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Username</th><th>Amount</th><th>Bank Details</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="with-pending-body">
+                <tr><td colspan="6"><div class="empty-state">Loading…</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ===== APPROVED WITHDRAWALS ===== -->
+        <section class="page-section" id="section-with-approved">
+          <div class="section-header flex items-center justify-between">
+            <div>
+              <h2 class="section-title">Approved Withdrawals</h2>
+              <p class="section-sub">Successfully processed withdrawals.</p>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="loadWithdrawals('approved')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.08-4.95"/></svg>
+              Refresh
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Username</th><th>Amount</th><th>Bank Details</th><th>Date</th><th>Status</th></tr></thead>
+              <tbody id="with-approved-body"><tr><td colspan="5"><div class="empty-state">Loading…</div></td></tr></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ===== REJECTED WITHDRAWALS ===== -->
+        <section class="page-section" id="section-with-rejected">
+          <div class="section-header flex items-center justify-between">
+            <div>
+              <h2 class="section-title">Rejected Withdrawals</h2>
+              <p class="section-sub">Declined withdrawal requests.</p>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="loadWithdrawals('rejected')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.08-4.95"/></svg>
+              Refresh
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Username</th><th>Amount</th><th>Bank Details</th><th>Date</th><th>Status</th></tr></thead>
+              <tbody id="with-rejected-body"><tr><td colspan="5"><div class="empty-state">Loading…</div></td></tr></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ===== PENDING DEPOSITS ===== -->
+        <section class="page-section" id="section-dep-pending">
+          <div class="section-header flex items-center justify-between">
+            <div>
+              <h2 class="section-title">Pending Deposits</h2>
+              <p class="section-sub">Review and process incoming deposit requests.</p>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="loadDeposits('pending')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.08-4.95"/></svg>
+              Refresh
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Username</th><th>Amount</th><th>Bank Details</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="dep-pending-body">
+                <tr><td colspan="6"><div class="empty-state">Loading…</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ===== APPROVED DEPOSITS ===== -->
+        <section class="page-section" id="section-dep-approved">
+          <div class="section-header flex items-center justify-between">
+            <div>
+              <h2 class="section-title">Approved Deposits</h2>
+              <p class="section-sub">Successfully credited deposit requests.</p>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="loadDeposits('approved')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.08-4.95"/></svg>
+              Refresh
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Username</th><th>Amount</th><th>Bank Details</th><th>Date</th><th>Status</th></tr></thead>
+              <tbody id="dep-approved-body"><tr><td colspan="5"><div class="empty-state">Loading…</div></td></tr></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ===== REJECTED DEPOSITS ===== -->
+        <section class="page-section" id="section-dep-rejected">
+          <div class="section-header flex items-center justify-between">
+            <div>
+              <h2 class="section-title">Rejected Deposits</h2>
+              <p class="section-sub">Declined deposit requests.</p>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="loadDeposits('rejected')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.08-4.95"/></svg>
+              Refresh
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Username</th><th>Amount</th><th>Bank Details</th><th>Date</th><th>Status</th></tr></thead>
+              <tbody id="dep-rejected-body"><tr><td colspan="5"><div class="empty-state">Loading…</div></td></tr></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ===== BONUS PACKAGE ===== -->
+        <section class="page-section" id="section-bonus">
+          <div class="section-header">
+            <h2 class="section-title">Give Bonus Package</h2>
+            <p class="section-sub">Assign a free investment plan to a user as a gift.</p>
+          </div>
+          <div class="card card-lg">
+            <div style="display:flex;flex-direction:column;gap:0.875rem;">
+              <div class="form-group">
+                <label class="form-label">Username</label>
+                <input class="form-control" type="text" id="bonus-username" placeholder="Enter exact username" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Select Plan</label>
+                <select class="form-control" id="bonus-plan">
+                  <option value="">— Choose a Plan —</option>
+                  <option value="plan1">Plan 1 — Starter (₦4,000 / ₦450 daily)</option>
+                  <option value="plan2">Plan 2 — Silver (₦6,000 / ₦650 daily)</option>
+                  <option value="plan3">Plan 3 — Gold (₦10,000 / ₦850 daily)</option>
+                  <option value="plan4">Plan 4 — Diamond (₦20,000 / ₦1,850 daily)</option>
+                  <option value="plan5">Plan 5 — Elite (₦50,000 / ₦4,250 daily)</option>
+                  <option value="plan6">Plan 6 — Premium (₦100,000 / ₦6,500 daily)</option>
+                  <option value="plan7">Plan 7 — Platinum (₦200,000 / ₦11,500 daily)</option>
+                  <option value="plan8">Plan 8 — Legend (₦300,000 / ₦15,500 daily)</option>
+                </select>
+              </div>
+              <button class="btn btn-accent btn-lg" id="bonus-btn" onclick="handleGiveBonus()">
+                🎁 Give Bonus Package
+              </button>
+              <div id="bonus-result" class="form-hint"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== ADMIN PROFILE ===== -->
+        <section class="page-section" id="section-profile">
+          <div class="section-header">
+            <h2 class="section-title">Admin Profile</h2>
+            <p class="section-sub">Update your admin profile picture.</p>
+          </div>
+          <div class="card card-lg">
+            <div class="avatar-upload-wrap">
+              <div class="avatar-preview" id="profile-avatar">A</div>
+              <div>
+                <div style="font-size:1rem;font-weight:700;" id="profile-name">—</div>
+                <div style="font-size:0.82rem;color:var(--text-muted);" id="profile-email">—</div>
+                <div class="badge badge-primary" style="margin-top:0.35rem;">Administrator</div>
+              </div>
+            </div>
+            <form onsubmit="handleAdminUpdateProfile(event)" style="display:flex;flex-direction:column;gap:0.875rem;">
+              <div class="form-group">
+                <label class="form-label">Upload Profile Photo</label>
+                <input class="form-control" type="file" id="admin-profile-file" accept="image/*" onchange="previewAdminImage(this)" />
+                <span class="form-hint">JPEG, PNG, WebP. Encoded and saved securely.</span>
+              </div>
+              <button class="btn btn-primary" type="submit" id="admin-profile-btn">Update Profile Picture</button>
+            </form>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+  <script src="js/api.js"></script>
+  <script src="js/admin-dashboard.js"></script>
+</body>
+</html>
