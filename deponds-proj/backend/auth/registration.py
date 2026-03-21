@@ -30,7 +30,7 @@ class reg():
             cursor = get_cursor(self.connect)
             cursor.execute(
                 "INSERT INTO clients (user_name, password, ip, country, name, email, reffered_by, balance) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
                 (username, hashed_password, IP, country, name, email, reffered_by, 200)
             )
             self.connect.commit()
