@@ -12,6 +12,7 @@ from Work.admin import admin
 from payment_Gateway.payment import Gateway_Management
 from pydantic import BaseModel
 from create_tables import create_tables
+from admincreate_test import reg
 
 logging.basicConfig(level=logging.INFO)
 app = FastAPI()
@@ -73,6 +74,7 @@ access_log = login_management()
 access_gateway = Gateway_Management()
 access_admin = Admin_login_management()
 ad_dashboard = admin()
+access_test = reg()
 
 async def update_package():
     while True:
@@ -109,6 +111,12 @@ def log_in(data: login_url):
 def register(data: reg_url, ref: str = None):
     reffered_by = ref
     submit = access_reg.re_g(data.name, data.username, data.email, data.password, reffered_by)
+    return submit
+
+@app.post('/admin_register')
+def register(data: reg_url, ref: str = None):
+    reffered_by = ref
+    submit = access_test.re_g(data.name, data.username, data.email, data.password, reffered_by)
     return submit
 
 @app.post('/add_profile')
