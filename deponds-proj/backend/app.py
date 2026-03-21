@@ -11,10 +11,11 @@ from Work.user import user
 from Work.admin import admin
 from payment_Gateway.payment import Gateway_Management
 from pydantic import BaseModel
+from create_tables import create_tables
 
 logging.basicConfig(level=logging.INFO)
 app = FastAPI()
-
+create_tables()
 origins = [
     "http://localhost:5500",
     "http://127.0.0.1:5500",
