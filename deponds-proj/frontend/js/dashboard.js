@@ -61,7 +61,7 @@ async function initDashboard() {
    ============================================================ */
 async function loadUserStats() {
   try {
-    const data = await apiCall('/stats', 'POST');
+    const data = await apiCall('/api/stats', 'POST');
 
     const name = data.Name || data.username || 'User';
     const firstWord = name.split(' ')[0];
@@ -160,7 +160,7 @@ async function handleBuyPlan(planId, planName, cost, btn) {
   btn.classList.add('btn-loading');
   btn.disabled = true;
   try {
-    const data = await apiCall('/package', 'POST', { plan: planId });
+    const data = await apiCall('/api/package', 'POST', { plan: planId });
     const msg = typeof data === 'string' ? data : (data.message || JSON.stringify(data));
     if (msg.toLowerCase().includes('success') || msg.toLowerCase().includes('purchased')) {
       showToast(`✅ ${planName} Plan activated successfully!`, 'success');
@@ -258,7 +258,7 @@ async function handleDepositConfirm() {
 
   setLoading('dep-btn', true);
   try {
-    await apiCall('/deposit', 'POST', { amount_filled: amount, bank_details: bankDetails });
+    await apiCall('/api/deposit', 'POST', { amount_filled: amount, bank_details: bankDetails });
     showToast('✅ Deposit request submitted! Awaiting approval.', 'success');
     depGoBack();
   } catch (err) {
@@ -293,7 +293,7 @@ async function handleWithdrawSubmit(e) {
 
   setLoading('with-btn', true);
   try {
-    const data = await apiCall('/withdrawal', 'POST', { amount_filled: amount, bank_details: bankDetails });
+    const data = await apiCall('/api/withdrawal', 'POST', { amount_filled: amount, bank_details: bankDetails });
     const msg = typeof data === 'string' ? data : (data.message || 'Withdrawal request submitted!');
     if (msg.toLowerCase().includes('insufficient')) {
       errEl.textContent = msg;
@@ -320,7 +320,7 @@ async function loadNotifications() {
   list.innerHTML = `<div class="empty-state"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><p>Loading…</p></div>`;
 
   try {
-    const data = await apiCall('/notification', 'POST');
+    const data = await apiCall('/api/notification', 'POST');
     const items = Array.isArray(data) ? data : (data ? [data] : []);
 
     if (!items.length) {
@@ -363,7 +363,7 @@ async function loadReferralLink() {
   if (!input || input.value) return;
 
   try {
-    const data = await apiCall('/refferal_link', 'POST');
+    const data = await apiCall('/api/refferal_link', 'POST');
     const backendLink = data.ref_link || '';
 
     // Extract the ?ref= username from backend link and build frontend URL
@@ -425,7 +425,7 @@ async function handleUpdateProfile(e) {
     // Convert file to base64 data URL
     const dataUrl = await readFileAsDataURL(fileInput.files[0]);
 
-    await apiCall('/add_profile', 'POST', { image: dataUrl });
+    await apiCall('/api/add_profile', 'POST', { image: dataUrl });
     showToast('Profile picture updated!', 'success');
 
     // Update all avatar elements
@@ -473,7 +473,7 @@ async function handleChangePassword(e) {
 
   setLoading('pw-btn', true);
   try {
-    const data = await apiCall('/change_pw', 'POST', { old_password: oldPw, new_password: newPw });
+    const data = await apiCall('/api/change_pw', 'POST', { old_password: oldPw, new_password: newPw });
     const msg = typeof data === 'string' ? data : (data.message || '');
     if (data.success) {
       showToast('Password changed successfully!', 'success');
@@ -510,7 +510,7 @@ async function loadNotifDropdown() {
   if (!list) return;
 
   try {
-    const data = await apiCall('/notification', 'POST');
+    const data = await apiCall('/api/notification', 'POST');
     const items = Array.isArray(data) ? data : (data ? [data] : []);
     _notifDropdownLoaded = true;
 
@@ -553,7 +553,7 @@ function viewAllNotifications() {
    LOGOUT
    ============================================================ */
 async function handleLogout() {
-  try { await apiCall('/logout', 'POST'); } catch { /* ignore */ }
+  try { await apiCall('/api/logout', 'POST'); } catch { /* ignore */ }
   showToast('Logged out successfully.', 'info');
   setTimeout(() => { window.location.href = 'index.html'; }, 600);
 }
