@@ -2,7 +2,7 @@
    SIMPLE EARN — API Helper
    ============================================================ */
 
-const API_BASE = 'https://deepounds-site-1.onrender.com';
+const API_BASE = '/api';
 
 /**
  * Make an authenticated API call (includes cookies automatically).
