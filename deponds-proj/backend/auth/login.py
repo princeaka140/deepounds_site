@@ -93,7 +93,7 @@ class login_management():
                     "message": "Invalid Credentials"
                 }
         except Exception as err:
-            conn.rollback()
+            self.connect.rollback()
             print("ERROR:", e)
             return {"error": str(e)}
 
