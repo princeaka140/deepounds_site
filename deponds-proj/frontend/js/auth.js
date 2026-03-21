@@ -117,7 +117,7 @@ async function handleRegister() {
 
   setLoading('reg-btn', true);
   try {
-    let url = '/api/register';
+    let url = '/register';
     if (ref) url += `?ref=${encodeURIComponent(ref)}`;
 
     const data = await apiCall(url, 'POST', { name, username, email, password });
