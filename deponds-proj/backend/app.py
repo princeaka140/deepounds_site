@@ -19,7 +19,7 @@ create_tables()
 origins = [
     "http://localhost:5500",
     "http://127.0.0.1:5500",
-    "https://princeaka140.github.io"
+    "https://simpleearn1-com.onrender.com"
 ]
 
 app.add_middleware(
