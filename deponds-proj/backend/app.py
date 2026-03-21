@@ -100,7 +100,7 @@ def log_in(data: login_url):
             value = token,
             httponly = True,
             secure = True,
-            samesite = "Strict",
+            samesite = None,
             max_age = 4000
         )
     return response
