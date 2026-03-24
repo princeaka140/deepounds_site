@@ -102,6 +102,7 @@ async function loadUserStats() {
       ['Country',      "NG"],
       ['Device',       data.User_agents],
       ['Registered',   fmtDate(data['REGISTERED AT'])],
+      ['plans',         data.my_plans]
     ];
     details.innerHTML = rows.map(([k, v]) => `
       <div class="info-row">
@@ -109,8 +110,6 @@ async function loadUserStats() {
         <span class="val">${v || '—'}</span>
       </div>`).join('');
 
-    //plans overview
-    plan_details = document.getElementById('plan-details').innerHTML = data.my_plans
 
   } catch (err) {
     if (err.status === 401) {
