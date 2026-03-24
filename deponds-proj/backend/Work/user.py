@@ -59,7 +59,7 @@ class user():
             "balance": float(u['balance']),
             "username": u['user_name'],
             "EMAIL": u['email'],
-            "my_plans":  dict(row) for row in my_plans,
+            "my_plans":  dict(row for row in my_plans),
             "REGISTERED AT": str(u['created']),
             "PROFILE_PIC": u['profile_pic'],
         }
