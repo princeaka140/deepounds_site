@@ -363,6 +363,7 @@ async function loadReferralLink() {
     const data = await apiCall('/refferal_link', 'POST');
     const backendLink = data.ref_link || '';
      const records = data.records
+     document.getElementById('refferals-records') = records;
 
     // Extract the ?ref= username from backend link and build frontend URL
     let frontendLink = '';
@@ -387,7 +388,6 @@ async function loadReferralLink() {
 
 function copyRefLink() {
   const input = document.getElementById('ref-link-input');
-  document.getElementById('refferals-records') = records;
   if (!input?.value) return;
   navigator.clipboard.writeText(input.value)
     .then(() => showToast('Referral link copied!', 'success'))
