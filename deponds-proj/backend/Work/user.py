@@ -62,10 +62,6 @@ class user():
             "my_plans": my_plans,
             "REGISTERED AT": str(u['created']),
             "PROFILE_PIC": u['profile_pic'],
-            "PUBLIC_IP": session['public_ip'],
-            "LOCAL_IP": session['local_ip'],
-            "REGION": session['region'],
-            "COUNTRY": u['country'],
         }
 
     def notification(self, access_login):
@@ -121,7 +117,16 @@ class user():
         username = access_login.get('user_name')
         if not username:
             return "User not found"
-        return {"ref_link": f"http://127.0.0.1:8000/register?ref={username}"}
+        cursor = get_cursor(self.connect)
+        cursor.execute(
+            "SELECT * FROM refferals WHERE reffered_by=%s",
+            (username)
+        )
+        my_ref = cursor.fetchall()
+        return {
+            "ref_link": f"http://127.0.0.1:8000/register?ref={username}"
+            "records": dict(row for row in my_ref)
+            }
 
     def deposit(self, amount, status, bank_details, access_login):
         username = access_login.get("user_name")
@@ -169,25 +174,30 @@ class user():
         username = access_login.get("user_name")
         cursor = get_cursor(self.connect)
         cursor.execute(
-            "SELECT user_name, balance, reffered_by FROM clients WHERE user_name=%s",
+            "SELECT user_name, balance, name, reffered_by FROM clients WHERE user_name=%s",
             (username,)
         )
-        u = cursor.fetchone()
-        if not u:
-            return "User not active"
+        user = cursor.fetchone()
 
-        reffered_by = u["reffered_by"]
+        reffered_by = user["reffered_by"]
+    
+        if not user:
+            return "User not active"
+        if not reffered_by:
+            return "no upline found"
+
         expires = datetime.now() + timedelta(hours=24 * 60)
+        now = datetime.now()
 
         plans = {
             "plan1": ("plan_1", 4000, 480, reffered_by),
-            "plan2": ("plan_2", 6000, 120, reffered_by),
-            "plan3": ("plan_3", 10000, 0, None),
-            "plan4": ("plan_4", 20000, 0, None),
-            "plan5": ("plan_5", 50000, 0, None),
-            "plan6": ("plan_6", 100000, 0, None),
-            "plan7": ("plan_7", 200000, 0, None),
-            "plan8": ("plan_8", 300000, 0, None),
+            "plan2": ("plan_2", 6000, 720, reffered_by),
+            "plan3": ("plan_3", 10000, 1200, reffered_by),
+            "plan4": ("plan_4", 20000, 2400, reffered_by),
+            "plan5": ("plan_5", 50000, 50000, reffered_by),
+            "plan6": ("plan_6", 100000, 12000, reffered_by),
+            "plan7": ("plan_7", 200000, 24000, reffered_by),
+            "plan8": ("plan_8", 300000, 36000, reffered_by),
         }
 
         if package not in plans:
@@ -195,12 +205,22 @@ class user():
 
         plan_name, cost, ref_bonus, ref_user = plans[package]
 
-        if u['balance'] <= cost:
+        message = f"🎉 congratulations! your downline {user['name']}  purchased {plan_name} and you received a bonus of #{ref_bonus}"
+
+        if upline['balance'] < cost:
             return "insufficient funds"
 
         cursor.execute(
             "INSERT INTO packages(user_name, plan, status, expires, earned) VALUES(%s, %s, %s, %s, %s)",
             (username, plan_name, 'active', expires, 0)
+        )
+        cursor.execute(
+            "INSERT INTO refferals(name, reffered_by, plan, date) VALUES(%s, %s, %s, %s)",
+            (user['name'], reffered_by, plan_name, now)
+        )
+        cursor.execute(
+            "INSERT INTO notification(user_name, message, date) VALUES(%s, %s, %s)",
+            (reffered by, message, now)
         )
         cursor.execute(
             "UPDATE clients SET balance = balance - %s WHERE user_name=%s",
