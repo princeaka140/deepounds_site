@@ -88,7 +88,7 @@ async function loadUserStats() {
     // Overview stat cards
     document.getElementById('ov-balance').textContent = `₦${fmt(data.balance)}`;
     document.getElementById('ov-name').textContent    = data.Name    || '—';
-    document.getElementById('ov-plans').textContent   = Array.isArray(data.my_plans_active) ? data.my_plans.length : '—';
+    document.getElementById('ov-plans').textContent   = Array.isArray(data.active_plans) ? data.active_plans.length : '—';
     document.getElementById('ov-date').textContent    = fmtDate(data['REGISTERED AT']) || '—';
     document.getElementById('ov-region').textContent  = "NG";
 
@@ -358,7 +358,7 @@ async function loadReferralLink() {
   try {
     const data = await apiCall('/refferal_link', 'POST');
     const backendLink = data.ref_link || '';
-     const records = data.records
+    document.getElementById('records').innerHTML = data.records
 
     // Extract the ?ref= username from backend link and build frontend URL
     let frontendLink = '';
@@ -383,7 +383,6 @@ async function loadReferralLink() {
 
 function copyRefLink() {
   const input = document.getElementById('ref-link-input');
-  document.getElementById('refferals-records') = records;
   if (!input?.value) return;
   navigator.clipboard.writeText(input.value)
     .then(() => showToast('Referral link copied!', 'success'))
