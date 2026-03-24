@@ -118,10 +118,7 @@ class user():
         if not username:
             return "User not found"
         cursor = get_cursor(self.connect)
-        cursor.execute(
-            "SELECT * FROM refferals WHERE reffered_by=%s",
-            (username)
-        )
+        cursor.execute("SELECT * FROM refferals WHERE reffered_by=%s",(username))
         my_ref = cursor.fetchall()
         return {
             "ref_link": f"http://127.0.0.1:8000/register?ref={username}",
