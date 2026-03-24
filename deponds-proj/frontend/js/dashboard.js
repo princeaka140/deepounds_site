@@ -94,12 +94,13 @@ async function loadUserStats() {
 
     // Account details
     const details = document.getElementById('overview-details');
+    const plan = (data.my_plans && data.my_plans.length>0) ? data.my_plans[0].plan : "No active plan found"
     const rows = [
       ['Full Name',    data.Name],
       ['Username',     data.username],
       ['Email',        data.EMAIL],
       ['Balance',      data.balance !== undefined ? `₦${fmt(data.balance)}` : '—'],
-      ['My plan',      data.my_plans],
+      ['My plan',      plan],
       ['Device',       data.User_agents],
       ['Registered',   fmtDate(data['REGISTERED AT'])],
     ];
