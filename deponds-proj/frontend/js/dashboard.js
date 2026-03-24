@@ -109,6 +109,9 @@ async function loadUserStats() {
         <span class="val">${v || '—'}</span>
       </div>`).join('');
 
+    //plans overview
+    plan_details = document.getElementById('plan-details').innerHTML = data.my_plans
+
   } catch (err) {
     if (err.status === 401) {
       window.location.href = 'index.html';
