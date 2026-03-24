@@ -1,7 +1,3 @@
-/* ============================================================
-   SIMPLE EARN — User Dashboard Logic
-   ============================================================ */
-
 /* ---- Frontend base URL (for referral link rewrite) ---- */
 const FRONTEND_BASE = `${location.protocol}//${location.host}`;
 
@@ -94,7 +90,7 @@ async function loadUserStats() {
     document.getElementById('ov-name').textContent    = data.Name    || '—';
     document.getElementById('ov-plans').textContent   = Array.isArray(data.my_plans_active) ? data.my_plans.length : '—';
     document.getElementById('ov-date').textContent    = fmtDate(data['REGISTERED AT']) || '—';
-    document.getElementById('ov-region').textContent  = data.my_plan[];
+    document.getElementById('ov-region').textContent  = "NG";
 
     // Account details
     const details = document.getElementById('overview-details');
@@ -363,7 +359,6 @@ async function loadReferralLink() {
     const data = await apiCall('/refferal_link', 'POST');
     const backendLink = data.ref_link || '';
      const records = data.records
-     document.querySelector('.empty-state') = records;
 
     // Extract the ?ref= username from backend link and build frontend URL
     let frontendLink = '';
@@ -388,6 +383,7 @@ async function loadReferralLink() {
 
 function copyRefLink() {
   const input = document.getElementById('ref-link-input');
+  document.getElementById('refferals-records') = records;
   if (!input?.value) return;
   navigator.clipboard.writeText(input.value)
     .then(() => showToast('Referral link copied!', 'success'))
