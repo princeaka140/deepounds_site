@@ -51,7 +51,7 @@ class user():
             "SELECT plan FROM packages WHERE user_name=%s AND plan IS NOT NULL",
             (username,)
         )
-        my_plans = [dict:['plan'] for row in cursor.fetchall()]
+        my_plans = dict:['plan'] for row in cursor.fetchall()
 
         return {
             "Name": u['name'],
