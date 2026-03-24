@@ -130,7 +130,7 @@ class user():
         my_ref = cursor.fetchall()
         return {
             "ref_link": f"http://127.0.0.1:8000/register?ref={username}",
-            "records": dict(row for row in my_ref)
+            "records": my_ref
             }
 
     def deposit(self, amount, status, bank_details, access_login):
