@@ -99,7 +99,7 @@ async function loadUserStats() {
       ['Username',     data.username],
       ['Email',        data.EMAIL],
       ['Balance',      data.balance !== undefined ? `₦${fmt(data.balance)}` : '—'],
-      ['My plan',      data.my_plans['plan']],
+      ['My plan',      data.my_plans],
       ['Device',       data.User_agents],
       ['Registered',   fmtDate(data['REGISTERED AT'])],
     ];
