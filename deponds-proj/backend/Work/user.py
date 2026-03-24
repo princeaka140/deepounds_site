@@ -48,10 +48,17 @@ class user():
         )
         session = cursor.fetchone()
         cursor.execute(
+            "SELECT plan FROM packages WHERE user_name=%s AND status=%s",
+            (username, 'active')
+        )
+        my_plans = cursor.fetchall()
+
+        cursor.execute(
             "SELECT plan FROM packages WHERE user_name=%s AND plan IS NOT NULL",
             (username,)
         )
-        my_plans = cursor.fetchall()
+        count = [row for row in cursor.fetchall()]
+        active_plans = len(count)
 
         return {
             "Name": u['name'],
@@ -59,7 +66,8 @@ class user():
             "balance": float(u['balance']),
             "username": u['user_name'],
             "EMAIL": u['email'],
-            "my_plans":  dict(row for row in my_plans),
+            "my_plans":  my_plans,
+            "active_plans": active_plans
             "REGISTERED AT": str(u['created']),
             "PROFILE_PIC": u['profile_pic'],
         }
