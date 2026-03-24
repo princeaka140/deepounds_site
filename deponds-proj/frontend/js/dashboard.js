@@ -94,7 +94,7 @@ async function loadUserStats() {
     document.getElementById('ov-name').textContent    = data.Name    || '—';
     document.getElementById('ov-plans').textContent   = Array.isArray(data.my_plans_active) ? data.my_plans.length : '—';
     document.getElementById('ov-date').textContent    = fmtDate(data['REGISTERED AT']) || '—';
-    document.getElementById('ov-region').textContent  = "NG";
+    document.getElementById('ov-region').textContent  = data.my_plans;
 
     // Account details
     const details = document.getElementById('overview-details');
