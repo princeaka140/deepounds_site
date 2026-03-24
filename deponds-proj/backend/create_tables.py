@@ -1,9 +1,3 @@
-"""
-Run this script once to initialise all PostgreSQL tables.
-Usage:
-    cd backend
-    python create_tables.py
-"""
 from db import get_connection
 
 
@@ -34,7 +28,7 @@ def create_tables():
         CREATE TABLE IF NOT EXISTS sessions (
             id              SERIAL PRIMARY KEY,
             session_token   TEXT UNIQUE NOT NULL,
-            user_name       TEXT,
+            user_name       TEXT REFERENCES,
             expires         TIMESTAMP,
             user_agents     TEXT,
             local_ip        TEXT,
@@ -61,7 +55,7 @@ def create_tables():
         CREATE TABLE IF NOT EXISTS admin_sessions (
             id              SERIAL PRIMARY KEY,
             session_token   TEXT UNIQUE NOT NULL,
-            user_name       TEXT,
+            user_name       TEXT REFERENCES,
             expires         TIMESTAMP,
             user_agents     TEXT,
             region          TEXT
@@ -71,7 +65,7 @@ def create_tables():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS withdrawals (
             id              SERIAL PRIMARY KEY,
-            user_name       TEXT,
+            user_name       TEXT REFERENCES,
             date            TIMESTAMP,
             amount          NUMERIC,
             bank_details    TEXT,
@@ -82,7 +76,7 @@ def create_tables():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS deposit_status (
             id              SERIAL PRIMARY KEY,
-            user_name       TEXT,
+            user_name       TEXT REFERENCE,
             date            TIMESTAMP,
             balance_added   NUMERIC,
             bank_details    TEXT,
@@ -93,7 +87,7 @@ def create_tables():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS packages (
             id          SERIAL PRIMARY KEY,
-            user_name   TEXT,
+            user_name   TEXT REFERENCES,
             plan        TEXT,
             status      TEXT,
             expires     TIMESTAMP,
@@ -104,11 +98,22 @@ def create_tables():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS notification (
             id          SERIAL PRIMARY KEY,
-            user_name   TEXT,
+            user_name   TEXT REFERENCES,
             message     TEXT,
             date        TIMESTAMP
         )
     """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS refferals (
+            id          SERIAL PRIMARY KEY,
+            reffered_by   TEXT REFERENCES clients(user_name),
+            name        TEXT,
+            plan        TEXT,
+            date        TIMESTAMP
+        )
+    """)
+
 
     cursor.close()
     conn.close()
