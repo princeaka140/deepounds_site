@@ -28,7 +28,7 @@ def create_tables():
         CREATE TABLE IF NOT EXISTS sessions (
             id              SERIAL PRIMARY KEY,
             session_token   TEXT UNIQUE NOT NULL,
-            user_name       TEXT REFERENCES,
+            user_name       TEXT REFERENCES clients(user_name),
             expires         TIMESTAMP,
             user_agents     TEXT,
             local_ip        TEXT,
@@ -55,7 +55,7 @@ def create_tables():
         CREATE TABLE IF NOT EXISTS admin_sessions (
             id              SERIAL PRIMARY KEY,
             session_token   TEXT UNIQUE NOT NULL,
-            user_name       TEXT REFERENCES,
+            user_name       TEXT REFERENCES clients(user_name),
             expires         TIMESTAMP,
             user_agents     TEXT,
             region          TEXT
@@ -65,7 +65,7 @@ def create_tables():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS withdrawals (
             id              SERIAL PRIMARY KEY,
-            user_name       TEXT REFERENCES,
+            user_name       TEXT REFERENCES clients(user_name),
             date            TIMESTAMP,
             amount          NUMERIC,
             bank_details    TEXT,
@@ -76,7 +76,7 @@ def create_tables():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS deposit_status (
             id              SERIAL PRIMARY KEY,
-            user_name       TEXT REFERENCE,
+            user_name       TEXT REFERENCE clients(user_name),
             date            TIMESTAMP,
             balance_added   NUMERIC,
             bank_details    TEXT,
@@ -87,7 +87,7 @@ def create_tables():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS packages (
             id          SERIAL PRIMARY KEY,
-            user_name   TEXT REFERENCES,
+            user_name   TEXT REFERENCES clients(user_name),
             plan        TEXT,
             status      TEXT,
             expires     TIMESTAMP,
@@ -98,7 +98,7 @@ def create_tables():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS notification (
             id          SERIAL PRIMARY KEY,
-            user_name   TEXT REFERENCES,
+            user_name   TEXT REFERENCES clients(user_name),
             message     TEXT,
             date        TIMESTAMP
         )
