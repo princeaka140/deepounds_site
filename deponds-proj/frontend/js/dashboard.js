@@ -99,10 +99,9 @@ async function loadUserStats() {
       ['Username',     data.username],
       ['Email',        data.EMAIL],
       ['Balance',      data.balance !== undefined ? `₦${fmt(data.balance)}` : '—'],
-      ['Country',      "NG"],
+      ['My plan',      data.my_plans['plan']],
       ['Device',       data.User_agents],
       ['Registered',   fmtDate(data['REGISTERED AT'])],
-      ['plans',         data.my_plans]
     ];
     details.innerHTML = rows.map(([k, v]) => `
       <div class="info-row">
