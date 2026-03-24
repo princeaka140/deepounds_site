@@ -363,7 +363,7 @@ async function loadReferralLink() {
     const data = await apiCall('/refferal_link', 'POST');
     const backendLink = data.ref_link || '';
      const records = data.records
-     document.getElementById('refferals-records') = records;
+     document.querySelector('.empty-state') = records;
 
     // Extract the ?ref= username from backend link and build frontend URL
     let frontendLink = '';
