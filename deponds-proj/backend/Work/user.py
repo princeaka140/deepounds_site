@@ -212,7 +212,7 @@ class user():
 
         message = f"🎉 congratulations! your downline {user['name']}  purchased {plan_name} and you received a bonus of #{ref_bonus}"
 
-        if upline['balance'] < cost:
+        if user['balance'] < cost:
             return "insufficient funds"
 
         cursor.execute(
