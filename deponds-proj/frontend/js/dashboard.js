@@ -94,7 +94,7 @@ async function loadUserStats() {
 
     // Account details
     const details = document.getElementById('overview-details');
-    const plan = (data.my_plans && data.my_plans.length>0) ? data.my_plans.map(items=> items.plan).join(',') : "No active plan found"
+    const plan = (data.my_plans && data.my_plans.length>0) ? data.my_plans.map(items=> items.plan).join(', ') : "No active plan found"
     const rows = [
       ['Full Name',    data.Name],
       ['Username',     data.username],
