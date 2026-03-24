@@ -1,4 +1,4 @@
-from db import get_connection
+gfrom db import get_connection
 
 
 def create_tables():
