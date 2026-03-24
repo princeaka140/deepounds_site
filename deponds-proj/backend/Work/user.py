@@ -220,7 +220,7 @@ class user():
         )
         cursor.execute(
             "INSERT INTO notification(user_name, message, date) VALUES(%s, %s, %s)",
-            (reffered by, message, now)
+            (reffered_by, message, now)
         )
         cursor.execute(
             "UPDATE clients SET balance = balance - %s WHERE user_name=%s",
