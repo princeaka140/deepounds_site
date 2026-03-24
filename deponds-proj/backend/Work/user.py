@@ -51,7 +51,7 @@ class user():
             "SELECT plan FROM packages WHERE user_name=%s AND plan IS NOT NULL",
             (username,)
         )
-        my_plans = [row['plan'] for row in cursor.fetchall()]
+        my_plans = [dict:['plan'] for row in cursor.fetchall()]
 
         return {
             "Name": u['name'],
@@ -124,7 +124,7 @@ class user():
         )
         my_ref = cursor.fetchall()
         return {
-            "ref_link": f"http://127.0.0.1:8000/register?ref={username}"
+            "ref_link": f"http://127.0.0.1:8000/register?ref={username}",
             "records": dict(row for row in my_ref)
             }
 
