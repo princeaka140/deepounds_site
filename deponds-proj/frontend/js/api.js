@@ -4,13 +4,7 @@
 
 const API_BASE = '/api';
 
-/**
- * Make an authenticated API call (includes cookies automatically).
- * @param {string} endpoint  e.g. '/login'
- * @param {string} method    'POST' | 'GET'
- * @param {object|null} body JSON body
- * @returns {Promise<any>}
- */
+
 async function apiCall(endpoint, method = 'POST', body = null) {
   const options = {
     method,
