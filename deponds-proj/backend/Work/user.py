@@ -67,7 +67,7 @@ class user():
             "username": u['user_name'],
             "EMAIL": u['email'],
             "my_plans":  my_plans,
-            "active_plans": active_plans
+            "active_plans": active_plans,
             "REGISTERED AT": str(u['created']),
             "PROFILE_PIC": u['profile_pic'],
         }
