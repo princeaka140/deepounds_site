@@ -88,7 +88,7 @@ async function loadUserStats() {
     // Overview stat cards
     document.getElementById('ov-balance').textContent = `₦${fmt(data.balance)}`;
     document.getElementById('ov-name').textContent    = data.Name    || '—';
-    document.getElementById('ov-plans').textContent   = Array.isArray(data.active_plans) ? data.active_plans.length : '—';
+    document.getElementById('ov-plans').textContent   = Array.isArray(data.active_plans) ? data.active_plans : '—';
     document.getElementById('ov-date').textContent    = fmtDate(data['REGISTERED AT']) || '—';
     document.getElementById('ov-region').textContent  = "NG";
 
