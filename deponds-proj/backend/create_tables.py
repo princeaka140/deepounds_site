@@ -55,7 +55,7 @@ def create_tables():
         CREATE TABLE IF NOT EXISTS admin_sessions (
             id              SERIAL PRIMARY KEY,
             session_token   TEXT UNIQUE NOT NULL,
-            user_name       TEXT REFERENCES clients(user_name),
+            user_name       TEXT REFERENCES admin(user_name),
             expires         TIMESTAMP,
             user_agents     TEXT,
             region          TEXT
@@ -76,7 +76,7 @@ def create_tables():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS deposit_status (
             id              SERIAL PRIMARY KEY,
-            user_name       TEXT REFERENCE clients(user_name),
+            user_name       TEXT REFERENCES clients(user_name),
             date            TIMESTAMP,
             balance_added   NUMERIC,
             bank_details    TEXT,
