@@ -1,560 +1,464 @@
-/* ---- Frontend base URL (for referral link rewrite) ---- */
-const FRONTEND_BASE = `${location.protocol}//${location.host}`;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Earn — Dashboard</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <!-- avatar-upload-wrap, avatar-preview, bank-form-grid → main.css -->
+</head>
+<body>
+  <div class="app-layout">
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
-/* ============================================================
-   INVESTMENT PLANS DATA
-   ============================================================ */
-const PLANS = [
-  { id: 'plan1', name: 'Starter',  cost: 4000,   daily: 450,   total: 27000,  roi: 575 },
-  { id: 'plan2', name: 'Silver',   cost: 6000,   daily: 650,   total: 39000,  roi: 550 },
-  { id: 'plan3', name: 'Gold',     cost: 10000,  daily: 850,   total: 51000,  roi: 410 },
-  { id: 'plan4', name: 'Diamond',  cost: 20000,  daily: 1850,  total: 111000, roi: 455 },
-  { id: 'plan5', name: 'Elite',    cost: 50000,  daily: 4250,  total: 255000, roi: 410 },
-  { id: 'plan6', name: 'Premium',  cost: 100000, daily: 6500,  total: 390000, roi: 290 },
-  { id: 'plan7', name: 'Platinum', cost: 200000, daily: 11500, total: 690000, roi: 245 },
-  { id: 'plan8', name: 'Legend',   cost: 300000, daily: 15500, total: 930000, roi: 210, featured: true },
-];
-
-/* ============================================================
-   SECTION NAVIGATION
-   ============================================================ */
-const SECTION_TITLES = {
-  overview:      'Overview',
-  plans:         'Investment Plans',
-  deposit:       'Deposit',
-  withdraw:      'Withdraw',
-  notifications: 'Notifications',
-  referral:      'Referral Program',
-  settings:      'Settings',
-};
-
-function navigate(sectionId, navEl) {
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  navEl?.classList.add('active');
-  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
-  document.getElementById(`section-${sectionId}`)?.classList.add('active');
-  document.getElementById('header-title').textContent = SECTION_TITLES[sectionId] || sectionId;
-
-  if (sectionId === 'notifications') loadNotifications();
-  if (sectionId === 'referral') loadReferralLink();
-  if (sectionId === 'plans') renderPlans();
-
-  closeSidebar();
-}
-
-/* ============================================================
-   APP INIT
-   ============================================================ */
-async function initDashboard() {
-  await loadUserStats();
-  renderPlans();
-  loadNotifications();
-  loadReferralLink();
-}
-
-/* ============================================================
-   USER STATS / OVERVIEW
-   ============================================================ */
-async function loadUserStats() {
-  try {
-    const data = await apiCall('/stats', 'POST');
-
-    const name = data.Name || data.username || 'User';
-    const firstWord = name.split(' ')[0];
-
-    // Header
-    document.getElementById('header-username').textContent = firstWord;
-    const hdrAvatar = document.getElementById('header-avatar');
-    if (data.PROFILE_PIC) {
-      hdrAvatar.innerHTML = `<img src="${data.PROFILE_PIC}" alt="avatar" />`;
-    } else {
-      hdrAvatar.textContent = initials(name);
-    }
-
-    // Settings section
-    const settingsAvatar = document.getElementById('settings-avatar');
-    if (settingsAvatar) {
-      if (data.PROFILE_PIC) {
-        settingsAvatar.innerHTML = `<img src="${data.PROFILE_PIC}" alt="avatar" />`;
-      } else {
-        settingsAvatar.textContent = initials(name);
-      }
-    }
-    const settingsName  = document.getElementById('settings-name');
-    const settingsEmail = document.getElementById('settings-email');
-    if (settingsName)  settingsName.textContent  = data.Name  || '—';
-    if (settingsEmail) settingsEmail.textContent = data.EMAIL || '—';
-
-    // Overview stat cards
-    document.getElementById('ov-balance').textContent = `₦${fmt(data.balance)}`;
-    document.getElementById('ov-name').textContent    = data.Name    || '—';
-    document.getElementById('ov-plans').textContent   = typeof (data.active_plans) === "number" ? data.active_plans : '—';
-    document.getElementById('ov-date').textContent    = fmtDate(data['REGISTERED AT']) || '—';
-    document.getElementById('ov-region').textContent  = "NG";
-
-    // Account details
-    const details = document.getElementById('overview-details');
-    const rows = [
-      ['Full Name',    data.Name],
-      ['Username',     data.username],
-      ['Email',        data.EMAIL],
-      ['Balance',      data.balance !== undefined ? `₦${fmt(data.balance)}` : '—'],
-      ['Country',      "NG"],
-      ['Device',       data.User_agents],
-      ['Registered',   fmtDate(data['REGISTERED AT'])],
-      ['plans',         data.my_plans]
-    ];
-    details.innerHTML = rows.map(([k, v]) => `
-      <div class="info-row">
-        <span class="key">${k}</span>
-        <span class="val">${v || '—'}</span>
-      </div>`).join('');
-
-
-  } catch (err) {
-    if (err.status === 401) {
-      window.location.href = 'index.html';
-    } else {
-      showToast('Failed to load account data.', 'error');
-    }
-  }
-}
-
-/* ============================================================
-   INVESTMENT PLANS
-   ============================================================ */
-function renderPlans() {
-  const grid = document.getElementById('plans-grid');
-  if (!grid) return;
-
-  grid.innerHTML = PLANS.map((plan, i) => `
-    <div class="plan-card ${plan.featured ? 'featured' : ''}">
-      ${plan.featured ? '<span class="plan-badge">🔥 Best Value</span>' : ''}
-      <div>
-        <div class="plan-name">Plan ${i + 1} — ${plan.name}</div>
-        <div class="plan-cost">₦${fmt(plan.cost)} <span>/ one-time</span></div>
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon"><img src="logo/simple_earn_logo.png" alt=""></div>
+        <div class="sidebar-logo-text">Simple <span>Earn</span></div>
       </div>
-      <div class="plan-returns">
-        <div class="plan-return-row"><span class="label">Daily Return</span><span class="value green">₦${fmt(plan.daily)}</span></div>
-        <div class="plan-return-row"><span class="label">Duration</span><span class="value">60 days</span></div>
-        <div class="plan-return-row"><span class="label">Total Return</span><span class="value gold">₦${fmt(plan.total)}</span></div>
-        <div class="plan-return-row"><span class="label">ROI</span><span class="value" style="color:var(--primary)">${plan.roi}%</span></div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-group-label">Main</div>
+        <div class="nav-item active" data-section="overview" onclick="navigate('overview', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Overview
+        </div>
+        <div class="nav-item" data-section="plans" onclick="navigate('plans', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          Investment Plans
+        </div>
+
+        <div class="nav-group-label">Finance</div>
+        <div class="nav-item" data-section="deposit" onclick="navigate('deposit', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M5 12l7 7 7-7"/><rect x="3" y="19" width="18" height="2" rx="1"/></svg>
+          Deposit
+        </div>
+        <div class="nav-item" data-section="withdraw" onclick="navigate('withdraw', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M19 12l-7-7-7 7"/><rect x="3" y="3" width="18" height="2" rx="1"/></svg>
+          Withdraw
+        </div>
+
+        <div class="nav-group-label">Account</div>
+        <div class="nav-item" data-section="notifications" onclick="navigate('notifications', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Notifications
+          <span id="notif-count-badge" class="badge badge-danger" style="margin-left:auto;display:none"></span>
+        </div>
+        <div class="nav-item" data-section="referral" onclick="navigate('referral', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Referral
+        </div>
+        <div class="nav-item" data-section="settings" onclick="navigate('settings', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Settings
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-ghost btn-full" style="justify-content:flex-start;gap:0.6rem;color:var(--danger);" onclick="handleLogout()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Logout
+        </button>
       </div>
-      <button class="btn btn-primary btn-full" id="plan-btn-${plan.id}"
-        onclick="handleBuyPlan('${plan.id}','${plan.name}',${plan.cost},this)">
-        Invest ₦${fmt(plan.cost)}
+    </aside>
+
+    <!-- MAIN AREA -->
+    <div class="main-area">
+      <header class="top-header">
+        <button class="btn btn-icon btn-ghost header-hamburger" onclick="openSidebar()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span class="header-title" id="header-title">Overview</span>
+        <div class="header-actions">
+          <div class="notif-btn-wrap">
+            <button class="btn btn-icon btn-ghost notif-btn" onclick="toggleNotifDropdown(event)" aria-label="Notifications">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span class="notif-badge" id="header-notif-badge" style="display:none"></span>
+            </button>
+            <!-- NOTIFICATION DROPDOWN -->
+            <div class="notif-dropdown" id="notif-dropdown">
+              <div class="notif-dropdown-header">
+                <span class="notif-dropdown-title">🔔 Notifications</span>
+                <button class="btn btn-icon btn-ghost" style="padding:0.2rem;" onclick="closeNotifDropdown()" aria-label="Close notifications">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+              <div class="notif-dropdown-list" id="notif-dropdown-list">
+                <div class="empty-state" style="padding:1.5rem 1rem;"><p>Loading…</p></div>
+              </div>
+              <div class="notif-dropdown-footer">
+                <button class="btn btn-ghost btn-sm btn-full" onclick="viewAllNotifications()">View All Notifications →</button>
+              </div>
+            </div>
+          </div>
+          <div class="user-chip" onclick="navigate('settings', document.querySelector('[data-section=settings]'))">
+            <div class="avatar" id="header-avatar">U</div>
+            <span class="user-chip-name" id="header-username">User</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-content">
+
+        <!-- ===== OVERVIEW ===== -->
+        <section class="page-section active" id="section-overview">
+          <div class="section-header">
+            <h2 class="section-title">Overview</h2>
+            <p class="section-sub">Your account summary.</p>
+          </div>
+          <!-- Balance — full-width highlight card -->
+          <div class="stat-card balance-card" style="margin-bottom:0.75rem;">
+            <div class="stat-icon gold"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <div class="stat-label">Account Balance</div>
+            <div class="stat-value" id="ov-balance">—</div>
+          </div>
+
+          <div class="overview-grid" id="overview-stats">
+            <div class="stat-card">
+              <div class="stat-icon gold"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+              <div class="stat-label">Account Name</div>
+              <div class="stat-value" id="ov-name" style="font-size:1rem;word-break:break-word;">—</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon green"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+              <div class="stat-label">Active Plans</div>
+              <div class="stat-value" id="ov-plans">—</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon blue"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+              <div class="stat-label">Member Since</div>
+              <div class="stat-value" id="ov-date" style="font-size:0.85rem">—</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon red"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+              <div class="stat-label">Region</div>
+              <div class="stat-value" id="ov-region" style="font-size:0.85rem">—</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:1rem;">Account Details</h3>
+              <div id="overview-details">
+              <div class="empty-state"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>Loading your account details…</p></div>
+            </div>
+          </div>
+
+          
+        </section>
+
+        <!-- ===== INVESTMENT PLANS ===== -->
+        <section class="page-section" id="section-plans">
+          <div class="section-header">
+            <h2 class="section-title">Investment Plans</h2>
+            <p class="section-sub">Choose a plan. All plans run for 60 days with daily payouts.</p>
+          </div>
+          <div class="plans-grid" id="plans-grid"></div>
+        </section>
+
+        <!-- ===== DEPOSIT ===== -->
+        <section class="page-section" id="section-deposit">
+          <div class="section-header">
+            <h2 class="section-title">Deposit Funds</h2>
+            <p class="section-sub">Choose a payment gateway to fund your account.</p>
+          </div>
+
+          <!-- STEP 1: Gateway Selection -->
+          <div class="dep-step" id="dep-step-1">
+            <div class="txn-info-box" style="max-width:520px;margin-bottom:1.25rem;">
+              <strong>📌 How to Deposit:</strong> Select a gateway below, transfer the exact amount to the displayed account, then tap <strong>"I Have Deposited"</strong>. Minimum: <strong>₦4,000</strong>.
+            </div>
+            <div class="gateway-grid">
+              <div class="gateway-card" onclick="selectGateway('server1')" tabindex="0" role="button" aria-label="Select Server 1">
+                <div class="gateway-icon">⚡</div>
+                <div class="gateway-name">Server 1</div>
+                <div class="gateway-sub">Max ₦20,000</div>
+              </div>
+              <div class="gateway-card" onclick="selectGateway('server2')" tabindex="0" role="button" aria-label="Select Server 2">
+                <div class="gateway-icon">🔒</div>
+                <div class="gateway-name">Server 2</div>
+                <div class="gateway-sub">No Limit</div>
+              </div>
+              <div class="gateway-card" onclick="selectGateway('server3')" tabindex="0" role="button" aria-label="Select Server 3">
+                <div class="gateway-icon">💎</div>
+                <div class="gateway-name">Server 3</div>
+                <div class="gateway-sub">Max ₦30,000</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 2: Bank Details + Confirm -->
+          <div class="dep-step" id="dep-step-2" style="display:none;">
+            <div style="max-width:480px;">
+              <button class="btn btn-ghost btn-sm" style="margin-bottom:1rem;" onclick="depGoBack()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                Back to Gateways
+              </button>
+              <div class="card card-lg">
+                <!-- Gateway badge -->
+                <div class="dep-gw-badge">
+                  <span id="dep-gw-icon" style="font-size:1.3rem;"></span>
+                  <div>
+                    <div class="dep-gw-label">Selected Gateway</div>
+                    <div class="dep-gw-name" id="dep-gw-name">—</div>
+                  </div>
+                </div>
+
+                <div class="txn-info-box" style="margin-bottom:1.1rem;">
+                  <strong>📤 Transfer to this account:</strong>
+                </div>
+
+                <!-- Bank details -->
+                <div class="dep-details-box">
+                  <div class="dep-detail-row">
+                    <span class="dep-detail-label">Bank</span>
+                    <span class="dep-detail-val" id="dep-bank-display">—</span>
+                  </div>
+                  <div class="dep-detail-row">
+                    <span class="dep-detail-label">Account Name</span>
+                    <span class="dep-detail-val" id="dep-name-display">—</span>
+                  </div>
+                  <div class="dep-detail-row">
+                    <span class="dep-detail-label">Account Number</span>
+                    <span class="dep-detail-val dep-acct-row">
+                      <span id="dep-acctno-display">—</span>
+                      <button class="btn btn-icon btn-ghost dep-copy-btn" onclick="copyDepAcctNo()" title="Copy account number" aria-label="Copy account number">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                      </button>
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Amount input -->
+                <div class="form-group" style="margin:1.1rem 0 0.25rem;">
+                  <label class="form-label">Amount to Transfer (₦)</label>
+                  <input class="form-control" type="number" id="dep-amount" placeholder="e.g. 5000" min="4000" />
+                  <span class="form-hint" id="dep-amount-hint">Minimum: ₦4,000</span>
+                </div>
+                <div id="dep-error" class="form-error" style="display:none;margin-bottom:0.5rem;"></div>
+
+                <button class="btn btn-primary btn-lg btn-full" id="dep-btn" onclick="handleDepositConfirm()" style="margin-top:1rem;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                  I Have Deposited
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== WITHDRAW ===== -->
+        <section class="page-section" id="section-withdraw">
+          <div class="section-header">
+            <h2 class="section-title">Withdraw Funds</h2>
+            <p class="section-sub">Withdraw your earnings to your bank account.</p>
+          </div>
+          <div class="card card-lg" style="max-width:520px;">
+            <div class="txn-info-box">
+              <strong>📌 How to Withdraw:</strong> Enter the amount and your bank details. Minimum withdrawal is <strong>₦600</strong>. You must have sufficient balance. Withdrawals are processed manually.
+            </div>
+            <form onsubmit="handleWithdrawSubmit(event)" style="display:flex;flex-direction:column;gap:1rem;">
+              <div class="form-group">
+                <label class="form-label">Amount (₦)</label>
+                <input class="form-control" type="number" id="with-amount" placeholder="e.g. 1000" min="600" required />
+                <span class="form-hint">Minimum: ₦600</span>
+              </div>
+              <div class="bank-form-grid">
+                <div class="form-group">
+                  <label class="form-label">Bank Name</label>
+                  <input class="form-control" type="text" id="with-bank-name" placeholder="e.g. Access Bank" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Account Number</label>
+                  <input class="form-control" type="text" id="with-acct-no" placeholder="10-digit number" maxlength="10" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Account Name</label>
+                <input class="form-control" type="text" id="with-acct-name" placeholder="As on bank records" required />
+              </div>
+              <div id="with-error" class="form-error" style="display:none"></div>
+              <button class="btn btn-primary btn-lg" type="submit" id="with-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M19 12l-7-7-7 7"/></svg>
+                Submit Withdrawal Request
+              </button>
+            </form>
+          </div>
+        </section>
+
+        <!-- ===== NOTIFICATIONS ===== -->
+        <section class="page-section" id="section-notifications">
+          <div class="section-header flex items-center justify-between">
+            <div>
+              <h2 class="section-title">Notifications</h2>
+              <p class="section-sub">Your latest updates and earnings alerts.</p>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="loadNotifications()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.08-4.95"/></svg>
+              Refresh
+            </button>
+          </div>
+          <div id="notifications-list" style="display:flex;flex-direction:column;gap:0.5rem;">
+            <div class="empty-state"><p>Loading notifications…</p></div>
+          </div>
+        </section>
+
+        <!-- ===== REFERRAL ===== -->
+        <section class="page-section" id="section-referral">
+          <div class="section-header">
+            <h2 class="section-title">Referral Program</h2>
+            <p class="section-sub">Invite friends and earn commission on their first investment.</p>
+          </div>
+          <div class="card card-lg" style="max-width:540px;">
+            <div style="text-align:center;margin-bottom:1.5rem;">
+              <div style="font-size:2.5rem;margin-bottom:0.5rem;">🎁</div>
+              <h3 style="font-size:1rem;font-weight:700;">Earn up to ₦480 per referral</h3>
+              <p style="font-size:0.82rem;color:var(--text-muted);margin-top:0.25rem;">When your referred friend purchases Plan 1, you earn ₦480 instantly credited to your balance.</p>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Your Referral Link</label>
+              <div class="copy-input-wrap">
+                <input type="text" id="ref-link-input" readonly placeholder="Loading your referral link…" />
+                <button class="btn btn-accent" onclick="copyRefLink()">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  Copy
+                </button>
+              </div>
+              <span class="form-hint">Share this link — when someone registers through it, the referral is tracked automatically.</span>
+            </div>
+            <div style="margin-top:1.25rem;display:flex;flex-direction:column;gap:0.5rem;">
+              <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-faint);">Commission Structure</div>
+              <div class="info-row"><span class="key">Plan 1 Referral</span><span class="val text-success">12%</span></div>
+              <div class="info-row"><span class="key">Plan 2 Referral</span><span class="val text-success">4%</span></div>
+              <div class="info-row"><span class="key">Higher Plans</span><span class="val text-accent">Bonus via Admin</span></div>
+            </div>
+
+          </div>
+          <div id="refferals-records" style="display:flex;flex-direction:column;gap:0.5rem;">
+            <div id="records" class="empty-state"><p>Loading refferals</p></div>
+        </section>
+
+        <!-- ===== SETTINGS ===== -->
+        <section class="page-section" id="section-settings">
+          <div class="section-header">
+            <h2 class="section-title">Settings</h2>
+            <p class="section-sub">Manage your profile and account security.</p>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:1.25rem;max-width:520px;">
+            <!-- Profile Picture -->
+            <div class="card card-lg">
+              <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:1rem;">Profile Picture</h3>
+              <div class="avatar-upload-wrap">
+                <div class="avatar-preview" id="settings-avatar">U</div>
+                <div>
+                  <div style="font-weight:600;" id="settings-name">—</div>
+                  <div style="font-size:0.82rem;color:var(--text-muted);" id="settings-email">—</div>
+                </div>
+              </div>
+              <form onsubmit="handleUpdateProfile(event)" style="display:flex;flex-direction:column;gap:0.875rem;">
+                <div class="form-group">
+                  <label class="form-label">Upload Photo</label>
+                  <input class="form-control" type="file" id="profile-file" accept="image/*" onchange="previewProfileImage(this)" />
+                  <span class="form-hint">JPEG, PNG, WebP. File will be encoded and saved.</span>
+                </div>
+                <button class="btn btn-primary" type="submit" id="profile-btn">Update Profile Picture</button>
+              </form>
+            </div>
+
+            <!-- Change Password -->
+            <div class="card card-lg">
+              <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:1rem;">Change Password</h3>
+              <form onsubmit="handleChangePassword(event)" style="display:flex;flex-direction:column;gap:0.875rem;">
+                <div class="form-group">
+                  <label class="form-label">Current Password</label>
+                  <input class="form-control" type="password" id="old-pw" placeholder="••••••••" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">New Password</label>
+                  <input class="form-control" type="password" id="new-pw" placeholder="Min. 6 characters" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Confirm New Password</label>
+                  <input class="form-control" type="password" id="confirm-pw" placeholder="Re-enter new password" />
+                </div>
+                <button class="btn btn-secondary" type="submit" id="pw-btn">Update Password</button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <!-- SUPPORT FAB -->
+  <button class="support-fab" onclick="openSupportModal()" aria-label="Customer Support">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+      <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+      <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
+      <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+    </svg>
+  </button>
+
+  <!-- SUPPORT POPOVER — anchored above FAB -->
+  <div class="support-popover" id="support-popover">
+    <div class="support-popover-header">
+      <span style="font-size:0.9rem;font-weight:700;">💬 Customer Support</span>
+      <button class="btn btn-icon btn-ghost" style="padding:0.3rem;" onclick="closeSupportModal()" aria-label="Close support">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-  `).join('');
-}
+    <div class="support-popover-body">
+      <div class="support-msg">
+        <p class="support-headline">🚀 Start Your Investment Journey Today!</p>
+        <p>Unlock real earning potential with a trusted platform designed for smart investors like you.</p>
+        <div class="support-divider"></div>
+        <p>🎁 <strong>Welcome Bonus:</strong> Get ₦200 instantly when you sign up!</p>
+        <p>💼 Grow your funds with simple and reliable investment plans</p>
+        <p>📈 Designed for both beginners and experienced investors</p>
+        <div class="support-divider"></div>
+        <p>🔗 <strong>Contact Support:</strong><br>
+          <a href="https://t.me/Simplearn001" target="_blank" rel="noopener noreferrer">https://t.me/Simplearn001</a>
+        </p>
+        <p>👥 <strong>Join Our Community:</strong><br>
+          <a href="https://t.me/+Dh3gPK8mlQw4OGRk" target="_blank" rel="noopener noreferrer">https://t.me/+Dh3gPK8mlQw4OGRk</a>
+        </p>
+        <p class="support-cta">Don't miss out — your financial growth starts now! 🚀</p>
+      </div>
+    </div>
+    <div class="support-popover-footer">
+      <a href="https://t.me/Simplearn001" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" style="flex:1;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Chat Support
+      </a>
+      <a href="https://t.me/+Dh3gPK8mlQw4OGRk" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="flex:1;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Community
+      </a>
+    </div>
+  </div>
 
-async function handleBuyPlan(planId, planName, cost, btn) {
-  const ok = confirm(`Purchase ${planName} Plan for ₦${fmt(cost)}?\n\nThis will deduct ₦${fmt(cost)} from your balance and activate your plan immediately.`);
-  if (!ok) return;
-
-  btn.classList.add('btn-loading');
-  btn.disabled = true;
-  try {
-    const data = await apiCall('/package', 'POST', { plan: planId });
-    const msg = typeof data === 'string' ? data : (data.message || JSON.stringify(data));
-    if (msg.toLowerCase().includes('success') || msg.toLowerCase().includes('purchased')) {
-      showToast(`✅ ${planName} Plan activated successfully!`, 'success');
-    } else {
-      showToast(msg, 'warning');
+  <script src="js/api.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script>
+    function openSupportModal() {
+      closeNotifDropdown();
+      document.getElementById('support-popover').classList.add('open');
     }
-  } catch (err) {
-    showToast(err.message || 'Failed to purchase plan.', 'error');
-  } finally {
-    btn.classList.remove('btn-loading');
-    btn.disabled = false;
-  }
-}
-
-/* ============================================================
-   DEPOSIT — Gateway selection & confirm
-   ============================================================ */
-const GATEWAYS = {
-  server1: { name: 'Server 1', icon: '⚡', bank: 'Moniepoint MFB', accountName: 'Kamsi Chosen Oragwam', accountNumber: '5075903950', maxDeposit: 20000 },
-  server2: { name: 'Server 2', icon: '🔒', bank: 'Moniepoint MFB', accountName: 'Bulus Ezra Bitrus',    accountNumber: '5222488176', maxDeposit: null },
-  server3: { name: 'Server 3', icon: '💎', bank: 'Palmpay',         accountName: 'Kamsi Oragwam',        accountNumber: '8130185201', maxDeposit: 30000 },
-};
-
-let _selectedGateway = null;
-
-function selectGateway(gwId) {
-  const gw = GATEWAYS[gwId];
-  if (!gw) return;
-  _selectedGateway = gw;
-
-  // Populate detail fields
-  document.getElementById('dep-gw-icon').textContent    = gw.icon;
-  document.getElementById('dep-gw-name').textContent    = gw.name;
-  document.getElementById('dep-bank-display').textContent  = gw.bank;
-  document.getElementById('dep-name-display').textContent  = gw.accountName;
-  document.getElementById('dep-acctno-display').textContent = gw.accountNumber;
-
-  // Reset amount & error
-  const amtEl = document.getElementById('dep-amount');
-  if (amtEl) {
-    amtEl.value = '';
-    amtEl.max = gw.maxDeposit || '';
-  }
-  const hintEl = document.getElementById('dep-amount-hint');
-  if (hintEl) {
-    hintEl.textContent = gw.maxDeposit
-      ? `Min: ₦4,000 — Max: ₦${fmt(gw.maxDeposit)}`
-      : 'Minimum: ₦4,000 (no upper limit)';
-  }
-  const errEl = document.getElementById('dep-error');
-  if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
-
-  // Transition steps
-  document.getElementById('dep-step-1').style.display = 'none';
-  document.getElementById('dep-step-2').style.display = '';
-  document.getElementById('dep-amount')?.focus();
-}
-
-function depGoBack() {
-  _selectedGateway = null;
-  document.getElementById('dep-step-2').style.display = 'none';
-  document.getElementById('dep-step-1').style.display = '';
-}
-
-function copyDepAcctNo() {
-  const num = _selectedGateway?.accountNumber;
-  if (!num) return;
-  navigator.clipboard.writeText(num)
-    .then(() => showToast('Account number copied!', 'success'))
-    .catch(() => showToast('Could not copy.', 'warning'));
-}
-
-async function handleDepositConfirm() {
-  if (!_selectedGateway) return;
-  const errEl  = document.getElementById('dep-error');
-  const amount = parseInt(document.getElementById('dep-amount')?.value || '0');
-
-  errEl.style.display = 'none';
-
-  if (!amount || amount < 4000) {
-    errEl.textContent = 'Minimum deposit is ₦4,000.';
-    errEl.style.display = 'block';
-    return;
-  }
-
-  const gw = _selectedGateway;
-
-  if (gw.maxDeposit && amount > gw.maxDeposit) {
-    errEl.textContent = `Maximum deposit for ${gw.name} is ₦${fmt(gw.maxDeposit)}.`;
-    errEl.style.display = 'block';
-    return;
-  }
-
-  const bankDetails = `Bank: ${gw.bank}\nAccount Name: ${gw.accountName}\nAccount Number: ${gw.accountNumber}\nGateway: ${gw.name}`;
-
-  setLoading('dep-btn', true);
-  try {
-    await apiCall('/deposit', 'POST', { amount_filled: amount, bank_details: bankDetails });
-    showToast('✅ Deposit request submitted! Awaiting approval.', 'success');
-    depGoBack();
-  } catch (err) {
-    const msg = err.data?.detail || err.message || 'Deposit failed.';
-    errEl.textContent = msg;
-    errEl.style.display = 'block';
-  } finally {
-    setLoading('dep-btn', false);
-  }
-}
-
-/* ============================================================
-   WITHDRAW — form submit handler
-   ============================================================ */
-async function handleWithdrawSubmit(e) {
-  e.preventDefault();
-  const amount    = parseInt(document.getElementById('with-amount').value);
-  const bankName  = document.getElementById('with-bank-name').value.trim();
-  const acctNo    = document.getElementById('with-acct-no').value.trim();
-  const acctName  = document.getElementById('with-acct-name').value.trim();
-  const errEl     = document.getElementById('with-error');
-
-  errEl.style.display = 'none';
-
-  if (!amount || amount < 600) {
-    errEl.textContent = 'Minimum withdrawal is ₦600.';
-    errEl.style.display = 'block';
-    return;
-  }
-
-  const bankDetails = `Bank Name: ${bankName}\nAccount Number: ${acctNo}\nAccount Name: ${acctName}`;
-
-  setLoading('with-btn', true);
-  try {
-    const data = await apiCall('/withdrawal', 'POST', { amount_filled: amount, bank_details: bankDetails });
-    const msg = typeof data === 'string' ? data : (data.message || 'Withdrawal request submitted!');
-    if (msg.toLowerCase().includes('insufficient')) {
-      errEl.textContent = msg;
-      errEl.style.display = 'block';
-    } else {
-      showToast('✅ ' + msg, 'success');
-      e.target.reset();
+    function closeSupportModal() {
+      document.getElementById('support-popover').classList.remove('open');
     }
-  } catch (err) {
-    const msg = err.data?.detail || err.message || 'Withdrawal failed.';
-    errEl.textContent = msg;
-    errEl.style.display = 'block';
-  } finally {
-    setLoading('with-btn', false);
-  }
-}
-
-/* ============================================================
-   NOTIFICATIONS
-   ============================================================ */
-async function loadNotifications() {
-  const list = document.getElementById('notifications-list');
-  if (!list) return;
-  list.innerHTML = `<div class="empty-state"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><p>Loading…</p></div>`;
-
-  try {
-    const data = await apiCall('/notification', 'POST');
-    const items = Array.isArray(data) ? data : (data ? [data] : []);
-
-    if (!items.length) {
-      list.innerHTML = `<div class="empty-state">
-        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <p>No notifications yet. Start investing to see updates here.</p>
-      </div>`;
-      return;
-    }
-
-    const count = items.length;
-    ['notif-count-badge', 'header-notif-badge'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) { el.textContent = count > 99 ? '99+' : count; el.style.display = ''; }
+    // Close popovers on outside click
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.notif-btn-wrap')) closeNotifDropdown();
+      if (!e.target.closest('#support-popover') && !e.target.closest('.support-fab')) closeSupportModal();
     });
-
-    list.innerHTML = [...items].reverse().map(item => {
-      const msg  = item.message || (Array.isArray(item) ? item[1] : '') || JSON.stringify(item);
-      const date = item.date    || (Array.isArray(item) ? item[2] : '') || '';
-      return `<div class="notif-item">
-        <div class="notif-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        </div>
-        <div class="notif-body">
-          <div class="notif-msg">${msg}</div>
-          ${date ? `<div class="notif-time">${fmtDateTime(date)}</div>` : ''}
-        </div>
-      </div>`;
-    }).join('');
-  } catch (err) {
-    list.innerHTML = `<div class="empty-state"><p style="color:var(--danger)">Failed to load notifications.</p></div>`;
-  }
-}
-
-/* ============================================================
-   REFERRAL LINK — rewrite backend URL → frontend URL
-   ============================================================ */
-async function loadReferralLink() {
-  const input = document.getElementById('ref-link-input');
-  if (!input || input.value) return;
-
-  try {
-    const data = await apiCall('/refferal_link', 'POST');
-    const backendLink = data.ref_link || '';
-    document.getElementById('records').innerHTML = data.records
-
-    // Extract the ?ref= username from backend link and build frontend URL
-    let frontendLink = '';
-    try {
-      const backendUrl = new URL(backendLink);
-      const refUsername = backendUrl.searchParams.get('ref');
-      if (refUsername) {
-        // Build path relative to current location (same folder as dashboard.html)
-        const base = `${location.protocol}//${location.host}`;
-        const path = location.pathname.replace('dashboard.html', 'index.html');
-        frontendLink = `${base}${path}?ref=${encodeURIComponent(refUsername)}`;
-      }
-    } catch {
-      frontendLink = backendLink;
-    }
-
-    input.value = frontendLink || backendLink || 'Unable to load referral link.';
-  } catch {
-    input.value = 'Failed to load referral link.';
-  }
-}
-
-function copyRefLink() {
-  const input = document.getElementById('ref-link-input');
-  if (!input?.value) return;
-  navigator.clipboard.writeText(input.value)
-    .then(() => showToast('Referral link copied!', 'success'))
-    .catch(() => {
-      input.select();
-      document.execCommand('copy');
-      showToast('Referral link copied!', 'success');
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') { closeSupportModal(); closeNotifDropdown(); }
     });
-}
-
-/* ============================================================
-   PROFILE PICTURE — file upload (base64)
-   ============================================================ */
-function previewProfileImage(input) {
-  const preview = document.getElementById('settings-avatar');
-  if (!input.files || !input.files[0]) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    preview.innerHTML = `<img src="${e.target.result}" alt="preview" />`;
-  };
-  reader.readAsDataURL(input.files[0]);
-}
-
-async function handleUpdateProfile(e) {
-  e.preventDefault();
-  const fileInput = document.getElementById('profile-file');
-  if (!fileInput.files || !fileInput.files[0]) {
-    showToast('Please select an image file first.', 'warning');
-    return;
-  }
-
-  setLoading('profile-btn', true);
-  try {
-    // Convert file to base64 data URL
-    const dataUrl = await readFileAsDataURL(fileInput.files[0]);
-
-    await apiCall('/add_profile', 'POST', { image: dataUrl });
-    showToast('Profile picture updated!', 'success');
-
-    // Update all avatar elements
-    ['settings-avatar', 'header-avatar'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.innerHTML = `<img src="${dataUrl}" alt="avatar" />`;
-    });
-  } catch (err) {
-    showToast(err.message || 'Failed to update profile.', 'error');
-  } finally {
-    setLoading('profile-btn', false);
-  }
-}
-
-function readFileAsDataURL(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload  = e => resolve(e.target.result);
-    reader.onerror = () => reject(new Error('Failed to read file.'));
-    reader.readAsDataURL(file);
-  });
-}
-
-/* ============================================================
-   CHANGE PASSWORD — form submit
-   ============================================================ */
-async function handleChangePassword(e) {
-  e.preventDefault();
-  const oldPw  = document.getElementById('old-pw').value;
-  const newPw  = document.getElementById('new-pw').value;
-  const confPw = document.getElementById('confirm-pw').value;
-
-  if (!oldPw || !newPw || !confPw) {
-    showToast('All password fields are required.', 'warning');
-    return;
-  }
-  if (newPw !== confPw) {
-    showToast('New passwords do not match.', 'warning');
-    return;
-  }
-  if (newPw.length < 6) {
-    showToast('New password must be at least 6 characters.', 'warning');
-    return;
-  }
-
-  setLoading('pw-btn', true);
-  try {
-    const data = await apiCall('/change_pw', 'POST', { old_password: oldPw, new_password: newPw });
-    const msg = typeof data === 'string' ? data : (data.message || '');
-    if (data.success) {
-      showToast('Password changed successfully!', 'success');
-      e.target.reset();
-    } else {
-      showToast(msg || 'Failed to change password.', 'error');
-    }
-  } catch (err) {
-    showToast(err.message || 'Failed to change password.', 'error');
-  } finally {
-    setLoading('pw-btn', false);
-  }
-}
-
-/* ============================================================
-   NOTIFICATION DROPDOWN — header bell icon popup
-   ============================================================ */
-let _notifDropdownLoaded = false;
-
-function toggleNotifDropdown(e) {
-  e.stopPropagation();
-  const dropdown = document.getElementById('notif-dropdown');
-  const isOpen = dropdown.classList.contains('open');
-  dropdown.classList.toggle('open', !isOpen);
-  if (!isOpen && !_notifDropdownLoaded) loadNotifDropdown();
-}
-
-function closeNotifDropdown() {
-  document.getElementById('notif-dropdown')?.classList.remove('open');
-}
-
-async function loadNotifDropdown() {
-  const list = document.getElementById('notif-dropdown-list');
-  if (!list) return;
-
-  try {
-    const data = await apiCall('/notification', 'POST');
-    const items = Array.isArray(data) ? data : (data ? [data] : []);
-    _notifDropdownLoaded = true;
-
-    // Sync badge counts
-    const count = items.length;
-    ['notif-count-badge', 'header-notif-badge'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) { el.textContent = count > 99 ? '99+' : count; el.style.display = count ? '' : 'none'; }
-    });
-
-    if (!items.length) {
-      list.innerHTML = `<div class="empty-state" style="padding:1.5rem 1rem;"><p>No notifications yet.</p></div>`;
-      return;
-    }
-
-    list.innerHTML = [...items].reverse().slice(0, 8).map(item => {
-      const msg  = item.message || (Array.isArray(item) ? item[1] : '') || '';
-      const date = item.date    || (Array.isArray(item) ? item[2] : '') || '';
-      return `<div class="notif-item-sm">
-        <div class="notif-icon-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        </div>
-        <div class="notif-body">
-          <div class="notif-msg">${msg}</div>
-          ${date ? `<div class="notif-time">${fmtDateTime(date)}</div>` : ''}
-        </div>
-      </div>`;
-    }).join('');
-  } catch {
-    list.innerHTML = `<div class="empty-state" style="padding:1rem;"><p style="color:var(--danger)">Failed to load.</p></div>`;
-  }
-}
-
-function viewAllNotifications() {
-  closeNotifDropdown();
-  navigate('notifications', document.querySelector('[data-section=notifications]'));
-}
-
-/* ============================================================
-   LOGOUT
-   ============================================================ */
-async function handleLogout() {
-  try { await apiCall('/logout', 'POST'); } catch { /* ignore */ }
-  showToast('Logged out successfully.', 'info');
-  setTimeout(() => { window.location.href = 'index.html'; }, 600);
-}
-
-/* ============================================================
-   INIT
-   ============================================================ */
-document.addEventListener('DOMContentLoaded', initDashboard);
+  </script>
+</body>
+</html>
