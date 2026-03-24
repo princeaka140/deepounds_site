@@ -92,7 +92,7 @@ async function loadUserStats() {
     // Overview stat cards
     document.getElementById('ov-balance').textContent = `₦${fmt(data.balance)}`;
     document.getElementById('ov-name').textContent    = data.Name    || '—';
-    document.getElementById('ov-plans').textContent   = Array.isArray(data.my_plans) ? data.my_plans.length : '—';
+    document.getElementById('ov-plans').textContent   = Array.isArray(data.my_plans_active) ? data.my_plans.length : '—';
     document.getElementById('ov-date').textContent    = fmtDate(data['REGISTERED AT']) || '—';
     document.getElementById('ov-region').textContent  = "NG";
 
@@ -103,7 +103,7 @@ async function loadUserStats() {
       ['Username',     data.username],
       ['Email',        data.EMAIL],
       ['Balance',      data.balance !== undefined ? `₦${fmt(data.balance)}` : '—'],
-      ['Country',      data.COUNTRY],
+      ['Country',      "NG"],
       ['Device',       data.User_agents],
       ['Registered',   fmtDate(data['REGISTERED AT'])],
     ];
