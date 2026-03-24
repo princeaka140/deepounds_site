@@ -11,15 +11,13 @@ from Work.user import user
 from Work.admin import admin
 from payment_Gateway.payment import Gateway_Management
 from pydantic import BaseModel
-from create_tables import create_tables
 
 logging.basicConfig(level=logging.INFO)
 app = FastAPI()
-create_tables()
+
 origins = [
     "http://localhost:5500",
-    "http://127.0.0.1:5500",
-    "https://simpleearn1-com.onrender.com"
+    "http://127.0.0.1:5500"
 ]
 
 app.add_middleware(
@@ -67,24 +65,20 @@ class package(BaseModel):
 class bonus_package(BaseModel):
     username: str
     plan: str
+class update_plans_url(BaseModel):
+    command: str
 access_reg = reg()
 access_user = user()
 access_log = login_management()
 access_gateway = Gateway_Management()
 access_admin = Admin_login_management()
 ad_dashboard = admin()
-access_test = reg()
 
-async def update_package():
-    while True:
-        try:
-            access_user.auto_update()
-        except Exception as err:
-            print(err)
-        await asyncio.sleep(60*60*24)
-@app.on_event("startup")
-async def updater():
-    asyncio.create_task(update_package())
+@app.post("/update_plans")
+async def updater(data: update_plans_url):
+    if data.command == update_packages:
+        return "Good"
+
 @app.get('/')
 async def home():
     logging.info("Active")
@@ -101,7 +95,7 @@ def log_in(data: login_url):
             value = token,
             httponly = True,
             secure = True,
-            samesite = "Lax",
+            samesite = "Strict",
             max_age = 4000
         )
     return response
