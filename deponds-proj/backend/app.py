@@ -1,5 +1,4 @@
 import logging
-import asyncio
 from fastapi import FastAPI, Request
 from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -75,9 +74,9 @@ access_admin = Admin_login_management()
 ad_dashboard = admin()
 
 @app.post("/update_plans")
-async def updater(data: update_plans_url):
+def updater(data: update_plans_url):
     if data.command == "update_packages":
-        ayncio.access_user.auto_update()
+        access_user.auto_update()
 
 @app.get('/')
 async def home():
