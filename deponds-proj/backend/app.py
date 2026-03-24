@@ -77,7 +77,7 @@ ad_dashboard = admin()
 @app.post("/update_plans")
 async def updater(data: update_plans_url):
     if data.command == "update_packages":
-        access_user.auto_update()
+        acyncio.access_user.auto_update()
 
 @app.get('/')
 async def home():
