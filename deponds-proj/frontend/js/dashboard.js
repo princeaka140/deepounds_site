@@ -1,5 +1,3 @@
-const { createContext, createElement } = require("react");
-
 /* ---- Frontend base URL (for referral link rewrite) ---- */
 const FRONTEND_BASE = `${location.protocol}//${location.host}`;
 
