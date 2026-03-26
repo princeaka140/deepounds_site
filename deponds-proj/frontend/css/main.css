@@ -463,6 +463,22 @@ tbody td:first-child { font-weight: 700; }
   flex: 1;
   min-height: 0;
 }
+#refferals-records ul li{
+  padding: 20px;
+  border: 3px solid #440b0b;
+  border-radius: 20px;
+  font-size: xx-large;
+}
+#refferals-records ul li:hover {
+   box-shadow: 5px 10px 5px var(--surface-3);
+}
+#records {
+  color: green;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding: 20px;
+}
 
 /* Listing sections: table-wrap fills remaining height and scrolls */
 .page-section.active .table-wrap {
