@@ -368,11 +368,12 @@ async function loadReferralLink() {
       rec.forEach(items =>{
         const li = document.createElement('li');
         li.textContent = `${items.name} is currently on ${items.plan}`
-        display = appendChild(li)
+       const display = appendChild(li)
         document.getElementById("records").innerHTML = display
       })
     }
     else{
+      document.getElementById("ref-load").innerHTML = ""
       document.getElementById("records").innerHTML = "No refferal found"
     }
 
