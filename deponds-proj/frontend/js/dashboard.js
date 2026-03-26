@@ -363,14 +363,13 @@ async function loadReferralLink() {
     const data = await apiCall('/refferal_link', 'POST');
     const backendLink = data.ref_link || '';
      const rec = (data.record && data.record.length>0) ? data.record : []
-     if(rec){
-      document.getElementById("record").innerHTML = ""
-      rec.forEach(items =>{
-        const li = document.createElement('li');
-          li.textContent = `${items.name} is currently on ${items.plan}`
-          document.getElementById("records").appendChild(li)
-      })
-    }
+     
+    document.getElementById("record").innerHTML = ""
+    rec.forEach(items =>{
+      const li = document.createElement('li');
+        li.textContent = `${items.name} is currently on ${items.plan}`
+        document.getElementById("records").appendChild(li)
+    })
 
     // Extract the ?ref= username from backend link and build frontend URL
     let frontendLink = '';
