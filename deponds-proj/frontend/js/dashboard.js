@@ -364,16 +364,13 @@ async function loadReferralLink() {
     const backendLink = data.ref_link || '';
      const rec = (data.records && data.records.length>0) ? data.records : []
     if(rec.length>0){ 
-      document.getElementById("ref-load").innerHTML = ""
       rec.forEach(items =>{
         const li = document.createElement('li');
         li.textContent = `${items.name} is currently on ${items.plan}`
-       const display = appendChild(li)
-        document.getElementById("records").innerHTML = display
+        document.getElementById("records").appendChild(li)
       })
     }
     else{
-      document.getElementById("ref-load").innerHTML = ""
       document.getElementById("records").innerHTML = "No refferal found"
     }
 
