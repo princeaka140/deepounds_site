@@ -156,7 +156,7 @@ class user():
     def withdraw(self, amount, status, bank_details, access_login):
         username = access_login.get("user_name")
         cursor = get_cursor(self.connect)
-        cursor.execute("SELECT balance FROM clients WHERE user_name=%s", (username,))
+        cursor.execute("SELECT balance FROM clients WHERE user_name=%s AND status = %s", (username, 'approved'))
         u = cursor.fetchone()
         cursor.execute("SELECT * FROM deposit_status WHERE user_name=%s",(username,))
         isdeposit = cursor.fetchall()
