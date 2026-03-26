@@ -158,7 +158,7 @@ class user():
         cursor = get_cursor(self.connect)
         cursor.execute("SELECT balance FROM clients WHERE user_name=%s", (username,))
         u = cursor.fetchone()
-        cursor.execute("SELECT * FROM deposit_status WHERE user_name=%s AND status = %s",(username, 'approved'))
+        cursor.execute("SELECT * FROM deposit_status WHERE user_name=%s AND status = %s",(username, 'successful'))
         isdeposit = cursor.fetchall()
         if not isdeposit:
             return "⚠ To withdraw, You need to have at least one deposit record"
