@@ -368,7 +368,8 @@ async function loadReferralLink() {
       rec.forEach(items =>{
         const li = document.createElement('li');
         li.textContent = `${items.name} is currently on ${items.plan}`
-        document.getElementById("records").appendChild(li)
+        display = appendChild(li)
+        document.getElementById("records").innerHTML = display
       })
     }
     else{
