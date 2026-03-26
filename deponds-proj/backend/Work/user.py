@@ -156,9 +156,9 @@ class user():
     def withdraw(self, amount, status, bank_details, access_login):
         username = access_login.get("user_name")
         cursor = get_cursor(self.connect)
-        cursor.execute("SELECT balance FROM clients WHERE user_name=%s AND status = %s", (username, 'approved'))
+        cursor.execute("SELECT balance FROM clients WHERE user_name=%s", (username,))
         u = cursor.fetchone()
-        cursor.execute("SELECT * FROM deposit_status WHERE user_name=%s",(username,))
+        cursor.execute("SELECT * FROM deposit_status WHERE user_name=%s AND status = %s",(username, 'approved'))
         isdeposit = cursor.fetchall()
         if not isdeposit:
             return "⚠ To withdraw, You need to have at least one deposit record"
