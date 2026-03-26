@@ -1,4 +1,7 @@
-
+/* ============================================================
+   SIMPLE EARN — Global Design Tokens & Base Styles
+   Mobile-First
+   ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
@@ -456,6 +459,7 @@ tbody td:first-child { font-weight: 700; }
 .page-section.active {
   display: flex;
   flex-direction: column;
+  gap: 40px;
   flex: 1;
   min-height: 0;
 }
