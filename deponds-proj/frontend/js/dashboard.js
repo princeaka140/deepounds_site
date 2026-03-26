@@ -362,7 +362,7 @@ async function loadReferralLink() {
   try {
     const data = await apiCall('/refferal_link', 'POST');
     const backendLink = data.ref_link || '';
-     const rec = (data.record && data.record.length>0) ? data.record : []
+     const rec = (data.records && data.records.length>0) ? data.records : []
     if(rec.length>0){ document.getElementById("ref-load").innerHTML = ""
       rec.forEach(items =>{
         const li = document.createElement('li');
