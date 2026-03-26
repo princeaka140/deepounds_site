@@ -272,8 +272,8 @@ async function handleDepositConfirm() {
    ============================================================ */
 async function handleWithdrawSubmit(e) {
   e.preventDefault();
-  const amoun    = parseInt(document.getElementById('with-amount').value);
-  const amount = amoun - (amoun * 0.15)
+  const amoun    = (document.getElementById('with-amount').value);
+  const amount = parseInt(amoun - (amoun * 0.15))
   const bankName  = document.getElementById('with-bank-name').value.trim();
   const acctNo    = document.getElementById('with-acct-no').value.trim();
   const acctName  = document.getElementById('with-acct-name').value.trim();
