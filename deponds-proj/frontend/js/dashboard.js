@@ -365,7 +365,6 @@ async function loadReferralLink() {
      const rec = (data.records && data.records.length>0) ? data.records : []
     if(rec.length>0){ 
       document.getElementById("ref-load").innerHTML = ""
-      document.getElementById("records").innerHTML = ""
       rec.forEach(items =>{
         const li = document.createElement('li');
         li.textContent = `${items.name} is currently on ${items.plan}`
