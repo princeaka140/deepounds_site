@@ -1,9 +1,4 @@
-"""
-One-off migration script — run against PostgreSQL to add the bank_details column.
-Usage:
-    cd backend
-    python table.py
-"""
+
 from db import get_connection
 
 conn = get_connection()
